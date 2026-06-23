@@ -121,3 +121,7 @@ The unit tests use in-memory fakes for both Neo4j and the LLM, so they run witho
 live database or API key. They cover schema introspection + meta-namespace exclusion,
 graph-native memory, the agent's self-repair loop and session learning, and the
 improvement analyzer.
+
+For end-to-end testing against a live Neo4j (viewer, chat, memory, improvement, and the
+REST API), see **[TESTING.md](TESTING.md)** — a layered walkthrough from unit tests to
+the full agent.
