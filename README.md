@@ -1,5 +1,7 @@
 # Cyph3r
 
+[![CI](https://github.com/alanjlopez/Cyph3r/actions/workflows/ci.yml/badge.svg)](https://github.com/alanjlopez/Cyph3r/actions/workflows/ci.yml)
+
 A self-improving LLM agent that **reads, traverses, creates, and modifies a Neo4j
 graph** through Cypher. It is one step beyond an MCP server: instead of only exposing
 Cypher tools to some external host, Cyph3r owns the agent loop — it introspects the live
