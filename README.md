@@ -57,6 +57,29 @@ cp .env.example .env   # then fill in NEO4J_PASSWORD and ANTHROPIC_API_KEY
 docker run -p7474:7474 -p7687:7687 -e NEO4J_AUTH=neo4j/testpassword neo4j:5
 ```
 
+### Connecting to a local Neo4j Desktop instance
+
+If you run Neo4j locally with **Neo4j Desktop** instead of Docker, point Cyph3r at it via
+`.env` — no code changes needed:
+
+1. **Start the DBMS.** In Neo4j Desktop, start your instance (it must be *running*, not
+   stopped). Note its **Connection URI** (e.g. `neo4j://127.0.0.1:7687`).
+2. **Make sure a database exists.** Once started, the default database is usually named
+   `neo4j`. If the Databases list is empty, click **Create database** and note the name.
+3. **Set `.env`** to match (the URI scheme may be `neo4j://` or `bolt://` — both work for a
+   single local instance):
+
+   ```ini
+   NEO4J_URI=neo4j://127.0.0.1:7687
+   NEO4J_USER=neo4j
+   NEO4J_PASSWORD=<the password you set in Neo4j Desktop>
+   NEO4J_DATABASE=neo4j      # or the database name you created
+   ```
+
+4. **Verify the connection without an API key:** run `cyph3r view`. It only needs Neo4j,
+   so if the viewer loads (an empty graph at first) the connection works. Then add
+   `ANTHROPIC_API_KEY` and use `cyph3r chat` to start building the graph.
+
 ## Usage
 
 ```bash
