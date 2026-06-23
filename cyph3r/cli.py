@@ -65,5 +65,33 @@ def improve(
         client.close()
 
 
+@app.command()
+def view(
+    host: str = typer.Option("127.0.0.1", help="Host to bind the viewer server to."),
+    port: int = typer.Option(8000, help="Port to serve the viewer on."),
+    no_open: bool = typer.Option(False, "--no-open", help="Don't auto-open the browser."),
+) -> None:
+    """Launch an interactive web view of the current graph.
+
+    Starts the API server and opens the graph viewer in your browser. Works without an
+    LLM API key — only a Neo4j connection is required to view the graph.
+    """
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    url = f"http://{host}:{port}/graph/view"
+    console.print(
+        Panel.fit(
+            f"Graph viewer at [bold]{url}[/]\nPress Ctrl-C to stop.",
+            border_style="green",
+        )
+    )
+    if not no_open:
+        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+    uvicorn.run("cyph3r.api:app", host=host, port=port, log_level="warning")
+
+
 if __name__ == "__main__":
     app()

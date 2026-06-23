@@ -33,6 +33,8 @@ cyph3r/
   memory.py     graph-native memory (the :Cyph3r* subgraph)
   traversal.py  neighbours / paths / relationship creation
   improve.py    analyze() + fix helpers
+  snapshot.py   point-in-time nodes/edges view for visualization
+  web.py        the interactive vis-network viewer page
   llm/          provider-agnostic interface + Anthropic reference impl
   tools.py      the tool surface exposed to the LLM
   agent.py      the control loop (self-repair, memory, learning)
@@ -64,11 +66,27 @@ cyph3r chat --session demo
 # Run a continuous-improvement pass
 cyph3r improve --session demo
 
+# See the graph: launches a server and opens an interactive view in your browser.
+# Works without an LLM API key — only a Neo4j connection is needed.
+cyph3r view                     # then explore at http://127.0.0.1:8000/graph/view
+
 # REST API
 uvicorn cyph3r.api:app
 curl -s localhost:8000/chat -H 'content-type: application/json' \
   -d '{"session_id":"demo","message":"How many nodes are in the graph?"}'
 ```
+
+### Viewing the graph
+
+- `cyph3r view` (or `GET /graph/view`) renders the live graph with vis-network: pan/zoom,
+  click a node to see its properties, adjust the node limit, and reload on demand.
+- `GET /graph?limit=300&include_meta=false` returns the raw snapshot as JSON
+  (`nodes`, `edges`, `counts`, `truncated`). The whole graph is shown up to `limit`
+  nodes; a banner appears when the view is truncated.
+- By default the agent's own memory (`:Cyph3r*` nodes) is hidden; pass `include_meta=true`
+  (or tick "include memory" in the viewer) to show it.
+- The viewer and all read endpoints work even without `ANTHROPIC_API_KEY`; only `/chat`
+  and `/improve` require the LLM (they return 503 otherwise).
 
 ## Testing
 

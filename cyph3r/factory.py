@@ -15,10 +15,9 @@ from .schema import SchemaState
 from .tools import build_registry
 
 
-def build_agent(settings: Settings | None = None) -> tuple[GraphAgent, Neo4jClient]:
-    """Construct the agent and the underlying client (caller owns ``client.close()``)."""
+def build_client(settings: Settings | None = None) -> Neo4jClient:
+    """Construct just the Neo4j client (no LLM) — enough to read/view the graph."""
     settings = settings or load_settings()
-
     client = Neo4jClient(
         uri=settings.neo4j_uri,
         user=settings.neo4j_user,
@@ -26,6 +25,20 @@ def build_agent(settings: Settings | None = None) -> tuple[GraphAgent, Neo4jClie
         database=settings.neo4j_database,
     )
     client.ensure_meta_constraints(settings.cyph3r_meta_label_prefix)
+    return client
+
+
+def build_agent(
+    settings: Settings | None = None,
+    client: Neo4jClient | None = None,
+) -> tuple[GraphAgent, Neo4jClient]:
+    """Construct the agent and the underlying client (caller owns ``client.close()``).
+
+    Pass an existing ``client`` to reuse one connection (e.g. when the viewer already
+    opened a client and we additionally want the LLM agent).
+    """
+    settings = settings or load_settings()
+    client = client or build_client(settings)
 
     provider = _build_provider(settings)
     schema_state = SchemaState(client, settings.cyph3r_meta_label_prefix)
