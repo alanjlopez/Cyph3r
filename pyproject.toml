@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyph3r"
+version = "0.1.0"
+description = "A self-improving LLM agent that reads, traverses, creates, and modifies a Neo4j graph via Cypher."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "neo4j>=5.14",
+    "anthropic>=0.40",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "typer>=0.12",
+    "rich>=13.7",
+    "pydantic-settings>=2.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+cyph3r = "cyph3r.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["cyph3r*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
