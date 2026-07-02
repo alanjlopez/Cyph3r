@@ -10,13 +10,14 @@ builds on the previous one; stop wherever you have enough confidence.
 In-memory fakes stand in for both Neo4j and the LLM, so this runs anywhere:
 
 ```bash
-pip install -e .[dev]
+python3 -m venv .venv && source .venv/bin/activate   # macOS/zsh: venv is required
+pip install -e ".[dev]"                              # keep the quotes (zsh globs [dev])
 pytest
 ```
 
-Expect `18 passed`. Covers schema introspection + meta-namespace exclusion,
+Expect `21 passed`. Covers schema introspection + meta-namespace exclusion,
 graph-native memory, the agent's self-repair loop and session learning, the improvement
-analyzer, and the graph snapshot.
+analyzer, the graph snapshot, and the `cyph3r check` connection doctor.
 
 ## Layer 1 — Connect to your Neo4j (viewer, no API key)
 

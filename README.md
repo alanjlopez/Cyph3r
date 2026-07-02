@@ -51,13 +51,23 @@ providers slot in by implementing the same interface.
 
 ## Setup
 
-```bash
-pip install -e .[dev]
-cp .env.example .env   # then fill in NEO4J_PASSWORD and ANTHROPIC_API_KEY
+Use a virtual environment — on macOS this is required (system/Homebrew Pythons refuse
+`pip install` outside one), and the quotes around `".[dev]"` matter in zsh:
 
-# A local Neo4j for development:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # re-run this in each new terminal
+
+pip install -e ".[dev]"
+cp .env.example .env           # then fill in NEO4J_PASSWORD and ANTHROPIC_API_KEY
+
+# A local Neo4j for development (or use Neo4j Desktop — see below):
 docker run -p7474:7474 -p7687:7687 -e NEO4J_AUTH=neo4j/testpassword neo4j:5
 ```
+
+If `cyph3r` reports "command not found", the venv isn't active — run
+`source .venv/bin/activate` (or use `python3 -m cyph3r.cli <command>` from the repo
+root).
 
 ### Connecting to a local Neo4j Desktop instance
 
