@@ -78,9 +78,13 @@ If you run Neo4j locally with **Neo4j Desktop** instead of Docker, point Cyph3r 
    NEO4J_DATABASE=neo4j      # or the database name you created
    ```
 
-4. **Verify the connection without an API key:** run `cyph3r view`. It only needs Neo4j,
-   so if the viewer loads (an empty graph at first) the connection works. Then add
-   `ANTHROPIC_API_KEY` and use `cyph3r chat` to start building the graph.
+4. **Verify the connection without an API key:** run `cyph3r check`. It tests the
+   connection and prints a diagnosis with fix hints (DBMS stopped, wrong password,
+   missing database). Once it reports `Connected`, use `cyph3r view` to see the graph,
+   then add `ANTHROPIC_API_KEY` and use `cyph3r chat` to start building it.
+
+> The DBMS folder path and ID shown in Neo4j Desktop are not needed — Cyph3r connects
+> over Bolt using only the Connection URI, user, password, and database name.
 
 ## Usage
 

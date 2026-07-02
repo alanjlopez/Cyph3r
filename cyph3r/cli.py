@@ -93,5 +93,82 @@ def view(
     uvicorn.run("cyph3r.api:app", host=host, port=port, log_level="warning")
 
 
+def _diagnose(exc: Exception) -> str:
+    """Turn a connection failure into an actionable message."""
+    text = f"{type(exc).__name__}: {exc}"
+    name = type(exc).__name__
+    msg = str(exc).lower()
+    hints: list[str] = []
+    if name == "ServiceUnavailable" or "connection refused" in msg or "unable to retrieve routing" in msg:
+        hints.append("Is the DBMS running? Start it in Neo4j Desktop (it must not say STOPPED), then retry.")
+        hints.append("Confirm NEO4J_URI matches the Connection URI shown in Desktop (default neo4j://127.0.0.1:7687).")
+    if name == "AuthError" or "unauthorized" in msg or "authentication" in msg:
+        hints.append("NEO4J_USER / NEO4J_PASSWORD in .env don't match — use the password you set for this DBMS in Neo4j Desktop.")
+    if "databasenotfound" in msg or "database does not exist" in msg or "database is unavailable" in msg:
+        hints.append("The database named in NEO4J_DATABASE doesn't exist — create it in Neo4j Desktop (Databases → Create database) or point NEO4J_DATABASE at an existing one.")
+    if not hints:
+        hints.append("Check Neo4j Desktop shows the DBMS as running, and that the URI, user, password, and database in .env match it.")
+    return text + "\n\n" + "\n".join(f"• {h}" for h in hints)
+
+
+@app.command()
+def check() -> None:
+    """Verify the Neo4j connection configured in .env and print a diagnosis.
+
+    Needs no LLM API key. Run this first when setting up against a local Neo4j.
+    """
+    from .config import load_settings
+    from .graph import Neo4jClient
+
+    settings = load_settings()
+    console.print(
+        f"Checking [bold]{settings.neo4j_uri}[/] "
+        f"(user: {settings.neo4j_user}, database: {settings.neo4j_database})"
+    )
+    try:
+        client = Neo4jClient(
+            uri=settings.neo4j_uri,
+            user=settings.neo4j_user,
+            password=settings.neo4j_password,
+            database=settings.neo4j_database,
+        )
+    except Exception as exc:  # bad URI scheme, driver-level failure
+        console.print(Panel(_diagnose(exc), title="connection failed", border_style="red"))
+        raise typer.Exit(1)
+
+    try:
+        try:
+            client.read("RETURN 1 AS ok")
+        except Exception as exc:
+            console.print(Panel(_diagnose(exc), title="connection failed", border_style="red"))
+            raise typer.Exit(1)
+
+        version = "unknown"
+        nodes = "?"
+        try:
+            rows = client.read("CALL dbms.components() YIELD versions RETURN versions[0] AS v")
+            if rows:
+                version = rows[0]["v"]
+        except Exception:
+            pass
+        try:
+            nodes = client.read("MATCH (n) RETURN count(n) AS c")[0]["c"]
+        except Exception:
+            pass
+    finally:
+        client.close()
+
+    console.print(
+        Panel(
+            f"Connected. Neo4j {version}, database [bold]{settings.neo4j_database}[/], "
+            f"{nodes} node(s).\n"
+            "Next: [bold]cyph3r view[/] to see the graph (no API key needed), "
+            "or [bold]cyph3r chat[/] to start building it.",
+            title="ok",
+            border_style="green",
+        )
+    )
+
+
 if __name__ == "__main__":
     app()

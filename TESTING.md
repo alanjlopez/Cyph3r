@@ -24,8 +24,12 @@ Proves your `.env` + Neo4j connection works before involving the LLM.
 
 ```bash
 cp .env.example .env          # set NEO4J_PASSWORD (and NEO4J_URI if not the default)
+cyph3r check                  # tests the connection and diagnoses failures
 cyph3r view
 ```
+
+`cyph3r check` reports the Neo4j version, database, and node count on success; on
+failure it prints targeted hints (DBMS stopped, wrong credentials, missing database).
 
 - A browser opens at `http://127.0.0.1:8000/graph/view`. An empty graph (or just the
   counts bar) means the connection works.
